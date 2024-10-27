@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  keycloak:
+    container_name: keycloak-local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - KEYCLOAK_USER=${KEYCLOAK_USER}
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD}
+      - DB_VENDOR=${DB_VENDOR}
+      - DB_ADDR=${DB_ADDR}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+#      - KEYCLOAK_IMPORT=/tmp/realm.json  # (Optional to import realm)
+    ports:
+      - "9091:8080" # Host:Container
+    volumes:
+      - keycloak_data:/opt/jboss/keycloak/standalone/data  # Volume to persist data
+#    networks:
+#        keycloak_net:
+#          ipv4_address: 172.50.0.4
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    container_name: postgres-keycloak-local
+    image: postgres:17.0
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data  # Volume to persist data
+#    networks:
+#        keycloak_net:
+#          ipv4_address: 172.50.0.5
+    restart: unless-stopped
+
+volumes:
+    keycloak_data:
+    db_data:
+      
+#networks:
+#  keycloak_net:
+#    driver: bridge
+#    ipam: # IP Address Management
+#      config:
+#        - subnet: 172.50.0.0/16  

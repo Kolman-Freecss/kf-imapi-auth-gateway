@@ -5,6 +5,38 @@
 - IMAPI Authentication Gateway Service: https://github.com/Kolman-Freecss/kf-imapi-auth-gateway
 - IMAPI DevOps / Kafka Event Handling: https://github.com/Kolman-Freecss/kf-imapi-devops
 
+## Brief Description
+
+Features: 
+- Implementation of security using Spring Boot 3.0 and Keycloack with JSON Web Tokens (JWT).
+- API Gateway for routing requests to the appropriate service.
+- SSO (Single Sign-On) using Keycloack.
+- OAuth2 Protocol.
+
+## Getting Started
+
+- Configure Keycloack with the following settings:
+  - New Realm: `imapi`
+  - Client: `imapi-gateway`
+    - Client ID: `imapi-gateway`
+  - 2 Roles: `USER` and `ADMIN`
+  - 2 Users: `user` and `admin`
+    - Password: `password`
+    - Map Roles to the users: `USER` and `ADMIN`
+
+**Diagram Flow:**
+
+![Diagram Flow](Diagram-Flow.svg)
+
+## Tech stack:
+
+- Spring Boot 3.0
+- Keycloack
+- JSON Web Tokens (JWT)
+- Maven
+- Docker
+
+
 ---
 
 Shield: [![CC-BY-NC-ND 4.0][CC-BY-NC-ND-shield]][CC-BY-NC-ND]

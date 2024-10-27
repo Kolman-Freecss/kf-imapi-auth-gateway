@@ -1,4 +1,4 @@
-package com.kolmanfreecss.KolmanSpringBootArchetype.shared.config;
+package org.kolmanfreecss.kfimapiauthgateway.shared.config;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +25,8 @@ public class PerformanceAspect {
     public void repositoryClassMethods() {
     }
 
-    @SneakyThrows
     @Around("repositoryClassMethods()")
-    public Object measureMethodExecutionTime(ProceedingJoinPoint proceedingJoinPoint) {
+    public Object measureMethodExecutionTime(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         long startTime = System.nanoTime();
         Object retVal = proceedingJoinPoint.proceed();
         long endTime = System.nanoTime();

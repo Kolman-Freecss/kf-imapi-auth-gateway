@@ -1,4 +1,4 @@
-package com.kolmanfreecss.KolmanSpringBootArchetype.infrastructure.config;
+package org.kolmanfreecss.kfimapiauthgateway.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

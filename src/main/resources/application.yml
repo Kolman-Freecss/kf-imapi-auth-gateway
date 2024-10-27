@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: kf-imapi-auth-gateway
+  security:
+    oauth2:
+      resource server:
+        jwt:
+          issuer-uri: http://localhost:9091/realms/kf-imapi-realm
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:9091/realms/kf-imapi-realm
+        registration:
+          keycloak:
+            client-id: demo
+            scope: openid
+            
+server:
+  port: 8084
+
+# ------------------------ Logging ------------------------
+logging:
+  level:
+    org.springframework.security: trace
+  pattern:
+    console: "%d{dd-MM-yyyy HH:mm:ss} %magenta([%thread]) %highlight(%-5level) %logger.%M - %msg%n"
+
+# ------------------------ Keycloak --------------------------
+#keycloak:
+#  auth-server-url: http://localhost:9091/auth
+#  realm: kf-imapi-realm
+#  resource: auth-gateway-keycloack
+#  credentials:
+#    secret: client-secret-aqui
+#  public-client: false
+#  security-constraints:
+#    - authRoles:
+#        - user
+#      securityCollections:
+#        - patterns:
+#            - /api/*
