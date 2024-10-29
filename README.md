@@ -35,6 +35,11 @@ Features:
 - JSON Web Tokens (JWT)
 - Maven
 - Docker
+- Spring Cloud Gateway
+- Spring Cloud Netflix (Eureka)
+- Resilence4j (Circuit Breaker)
+- Sleuth and Zipkin (Distributed Tracing)
+- Prometheus and Grafana (Monitoring)
 
 
 ---

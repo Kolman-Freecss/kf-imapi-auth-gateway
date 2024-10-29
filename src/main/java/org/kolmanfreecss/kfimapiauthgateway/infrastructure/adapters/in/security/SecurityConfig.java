@@ -3,24 +3,26 @@ package org.kolmanfreecss.kfimapiauthgateway.infrastructure.adapters.in.security
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @RequiredArgsConstructor
+@EnableWebFluxSecurity
 @Configuration
 public class SecurityConfig {
 
     final JwtAuthConverter authConverter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
         http
-//                .csrf(csrf -> csrf.disable()) // Disable CSRF if we are using JWT
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/hello").permitAll() // Public route
-                        .requestMatchers("/byeAdmin").hasRole("ADMIN") // Route for users with role ADMIN
-                        .requestMatchers("/bye").hasRole("USER") // Route for users with role USER
-                        .anyRequest().authenticated() // Any other route requires authentication
+                .csrf(ServerHttpSecurity.CsrfSpec::disable) // Disable CSRF if we are using JWT
+                .authorizeExchange(authorize -> authorize
+                        .pathMatchers("/hello").permitAll() // Public route
+                        .pathMatchers("/byeAdmin").hasRole("ADMIN") // Route for users with role ADMIN
+                        .pathMatchers("/bye").hasRole("USER") // Route for users with role USER
+                        .anyExchange().authenticated() // Any other route requires authentication
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(authConverter))

@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,18 +23,18 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Component
-public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+public class JwtAuthConverter implements Converter<Jwt, Mono<AbstractAuthenticationToken>> {
     
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Override
-    public AbstractAuthenticationToken convert(Jwt jwt) {
+    public Mono<AbstractAuthenticationToken> convert(Jwt jwt) {
         Collection<GrantedAuthority> authorities = Stream.concat(
                 jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
                 extractRoles(jwt).stream()
         ).collect(Collectors.toSet());
 
-        return new JwtAuthenticationToken(jwt, authorities);
+        return Mono.just(new JwtAuthenticationToken(jwt, authorities));
     }
 
     private Collection<? extends GrantedAuthority> extractRoles(Jwt jwt) {
