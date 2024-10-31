@@ -12,12 +12,14 @@ Features:
 - API Gateway for routing requests to the appropriate service.
 - SSO (Single Sign-On) using Keycloack.
 - OAuth2 Protocol.
+- Internal JWT signing to validate the token in every microservice verifying the authenticity of the API Gateway token. (X-Internal-Auth)
+  - (Another robust option is to sign every token through TLS, but it is not implemented in this project).
 
 ## Getting Started
 
 - Configure Keycloack with the following settings:
   - New Realm: `imapi`
-  - Client: `imapi-gateway`
+  - Create a new Client: `imapi-gateway`
     - Client ID: `imapi-gateway`
   - 2 Roles: `USER` and `ADMIN`
   - 2 Users: `user` and `admin`
@@ -40,6 +42,10 @@ Features:
 - Resilence4j (Circuit Breaker)
 - Sleuth and Zipkin (Distributed Tracing)
 - Prometheus and Grafana (Monitoring)
+
+## TroubleShooting
+
+- To wire all services through gateway ensure you add correctly the names and no duplicate services are up in same time.
 
 
 ---
