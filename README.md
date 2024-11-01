@@ -42,7 +42,8 @@ Features:
 - Spring Cloud Gateway
 - Spring Cloud Netflix (Eureka)
 - Resilence4j (Circuit Breaker)
-- Sleuth and Zipkin (Distributed Tracing)
+- Observability - Micrometer Tracing and Zipkin (Distributed Tracing) (Sleuth is deprecated)
+  - We use AOP support to decorate the methods with tracing annotations.
 - Prometheus and Grafana (Monitoring)
 
 ## TroubleShooting

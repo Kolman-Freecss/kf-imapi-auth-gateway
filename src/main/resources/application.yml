@@ -16,10 +16,21 @@ spring:
           keycloak:
             client-id: demo
             scope: openid
-            
+  
 server:
   port: 8084
   
+# ------------------------ Observability (Micrometer) --------------------------
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0 # 100%
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+
 # ------------------------ Gateway --------------------------
 gateway:
   # Configure it in a safe way like using a secret manager (K8s secrets, AWS Secrets Manager, etc)
