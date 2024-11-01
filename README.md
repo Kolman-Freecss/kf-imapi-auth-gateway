@@ -8,16 +8,18 @@
 ## Brief Description
 
 Features: 
-- Implementation of security using Spring Boot 3.0 and Keycloack with JSON Web Tokens (JWT).
+- Implementation of security using Spring Boot 3.0 and Keycloak with JSON Web Tokens (JWT).
 - API Gateway for routing requests to the appropriate service.
-- SSO (Single Sign-On) using Keycloack.
+  - Circuit Breaker using Resilience4j.
+  - Also we hide the internal services from the outside world and KEYCLOAK (everything is behind the gateway).
+- SSO (Single Sign-On) using Keycloak.
 - OAuth2 Protocol.
 - Internal JWT signing to validate the token in every microservice verifying the authenticity of the API Gateway token. (X-Internal-Auth)
   - (Another robust option is to sign every token through TLS, but it is not implemented in this project).
 
 ## Getting Started
 
-- Configure Keycloack with the following settings:
+- Configure Keycloak with the following settings:
   - New Realm: `imapi`
   - Create a new Client: `imapi-gateway`
     - Client ID: `imapi-gateway`
@@ -33,7 +35,7 @@ Features:
 ## Tech stack:
 
 - Spring Boot 3.0
-- Keycloack
+- Keycloak
 - JSON Web Tokens (JWT)
 - Maven
 - Docker

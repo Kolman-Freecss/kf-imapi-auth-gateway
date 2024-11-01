@@ -2,6 +2,7 @@ package org.kolmanfreecss.kfimapiauthgateway.infrastructure.adapters.in.gateway;
 
 import org.kolmanfreecss.kfimapiauthgateway.infrastructure.rest.FallbackController;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.GatewayFilterSpec;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -52,7 +53,30 @@ public class GatewayConfig {
                         .filters(customFilters("notifications"))
                         .uri("lb://KF-IMAPI-NOTIFICATIONS-SERVICE"))
 
+                // Service route for "auth" (Keycloak not registered in Eureka)
+                .route("auth_service", route -> route
+                        .path("/api/v1/auth/**")
+                        .filters(f -> {
+                            f.stripPrefix(3);
+                            f.filter(customGatewayFilter()); 
+                            f.circuitBreaker(c -> c.setName("authCircuitBreaker").setFallbackUri(FALLBACK_URI));
+                            return f;
+                        })
+                        .uri("http://localhost:9091"))
+
                 .build();
+    }
+    
+    /**
+     * Custom gateway filter.
+     *
+     * @return The custom gateway filter.
+     */
+    private GatewayFilter customGatewayFilter() {
+        return (exchange, chain) -> {
+            final ServerHttpRequest decoratedRequest = getDecoratedRequest(exchange.getRequest());
+            return chain.filter(exchange.mutate().request(decoratedRequest).build());
+        };
     }
 
     /**
@@ -64,20 +88,24 @@ public class GatewayConfig {
     private Function<GatewayFilterSpec, UriSpec> customFilters(final String serviceName) {
         return f -> f.filter((exchange, chain) -> {
             // We need to override the headers to add the internal auth secret because they are immutable by default 
-            final ServerHttpRequest decoratedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
-                @Override
-                public HttpHeaders getHeaders() {
-                    final HttpHeaders headers = new HttpHeaders();
-                    headers.putAll(super.getHeaders());
-                    headers.add(INTERNAL_AUTH_HEADER, internalAuthSecret); // Add new header
-                    return headers;
-                }
-            };
+            final ServerHttpRequest decoratedRequest = getDecoratedRequest(exchange.getRequest());
 
             // Continue the filter chain with the decorated request
             return chain.filter(exchange.mutate().request(decoratedRequest).build());
         }).circuitBreaker(c -> c.setName(serviceName + "CircuitBreaker")
                 .setFallbackUri(FALLBACK_URI));
+    }
+    
+    private ServerHttpRequest getDecoratedRequest(final ServerHttpRequest request) {
+        return new ServerHttpRequestDecorator(request) {
+            @Override
+            public HttpHeaders getHeaders() {
+                final HttpHeaders headers = new HttpHeaders();
+                headers.putAll(super.getHeaders());
+                headers.add(INTERNAL_AUTH_HEADER, internalAuthSecret);
+                return headers;
+            }
+        };
     }
 
     @Bean

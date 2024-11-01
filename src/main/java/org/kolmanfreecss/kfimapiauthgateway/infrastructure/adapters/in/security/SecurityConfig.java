@@ -13,13 +13,15 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
     final JwtAuthConverter authConverter;
+    
+    final String[] allowedRoutes = new String[] {"/hello", "/api/v1/auth/**"};
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable) // Disable CSRF if we are using JWT
                 .authorizeExchange(authorize -> authorize
-                        .pathMatchers("/hello").permitAll() // Public route
+                        .pathMatchers(allowedRoutes).permitAll() // Public routes
                         .pathMatchers("/byeAdmin").hasRole("ADMIN") // Route for users with role ADMIN
                         .pathMatchers("/bye").hasRole("USER") // Route for users with role USER
                         .anyExchange().authenticated() // Any other route requires authentication
