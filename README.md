@@ -5,6 +5,14 @@
 - IMAPI Authentication Gateway Service: https://github.com/Kolman-Freecss/kf-imapi-auth-gateway
 - IMAPI DevOps / Kafka Event Handling: https://github.com/Kolman-Freecss/kf-imapi-devops
 
+## Endpoint Utils
+
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+- Zipkin: http://localhost:9411
+- Keycloak: http://localhost:8080
+- Eureka: http://localhost:8761
+
 ## Brief Description
 
 Features: 
@@ -49,6 +57,8 @@ Features:
 ## TroubleShooting
 
 - To wire all services through gateway ensure you add correctly the names and no duplicate services are up in same time.
+- We need to use a specific filters to modify the immutable request headers because not in every phase of the request lifecycle we can modify the headers.
+  - Also we need 2 filter, because not all traffic is going through the same spring path
 
 
 ---

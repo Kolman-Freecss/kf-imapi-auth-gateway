@@ -1,6 +1,8 @@
 package org.kolmanfreecss.kfimapiauthgateway.infrastructure.adapters.in.gateway;
 
 import org.kolmanfreecss.kfimapiauthgateway.infrastructure.rest.FallbackController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -25,9 +27,10 @@ import java.util.function.Function;
 @Configuration
 public class GatewayConfig {
 
-    private static final String INTERNAL_AUTH_HEADER = "X-Internal-Auth";
+    public static final String INTERNAL_AUTH_HEADER = "X-Internal-Auth";
 
     private static final String FALLBACK_URI = "forward:/fallback";
+    private static final Logger log = LoggerFactory.getLogger(GatewayConfig.class);
 
     @Value("${gateway.internal-auth-secret}")
     private String internalAuthSecret;
@@ -42,9 +45,19 @@ public class GatewayConfig {
                         .uri("lb://KF-IMAPI-RESPONSES-SERVICE")) // Using Eureka service name
 
                 // Service route for "incident"
+//                .route("incident_service", route -> route
+//                        .path("/api/v1/incident/**")
+//                        .filters(customFilters("incident"))
+//                        .uri("lb://KF-IMAPI-INCIDENT-SERVICE"))
+
                 .route("incident_service", route -> route
-                        .path("/api/v1/incident/**")
-                        .filters(customFilters("incident"))
+                        .path("/incident/**")
+                        .filters(f -> {
+                            f.stripPrefix(1);
+                            f.filter(customGatewayFilter());
+                            f.circuitBreaker(c -> c.setName("incidentCircuitBreaker").setFallbackUri(FALLBACK_URI));
+                            return f;
+                        })
                         .uri("lb://KF-IMAPI-INCIDENT-SERVICE"))
 
                 // Service route for "notifications"
@@ -58,7 +71,7 @@ public class GatewayConfig {
                         .path("/api/v1/auth/**")
                         .filters(f -> {
                             f.stripPrefix(3);
-                            f.filter(customGatewayFilter()); 
+                            f.filter(customGatewayFilter());
                             f.circuitBreaker(c -> c.setName("authCircuitBreaker").setFallbackUri(FALLBACK_URI));
                             return f;
                         })
@@ -66,7 +79,7 @@ public class GatewayConfig {
 
                 .build();
     }
-    
+
     /**
      * Custom gateway filter.
      *
@@ -95,14 +108,20 @@ public class GatewayConfig {
         }).circuitBreaker(c -> c.setName(serviceName + "CircuitBreaker")
                 .setFallbackUri(FALLBACK_URI));
     }
-    
+
     private ServerHttpRequest getDecoratedRequest(final ServerHttpRequest request) {
         return new ServerHttpRequestDecorator(request) {
             @Override
             public HttpHeaders getHeaders() {
                 final HttpHeaders headers = new HttpHeaders();
                 headers.putAll(super.getHeaders());
-                headers.add(INTERNAL_AUTH_HEADER, internalAuthSecret);
+                try {
+                    if (!headers.containsKey(INTERNAL_AUTH_HEADER)) {
+                        headers.add(INTERNAL_AUTH_HEADER, internalAuthSecret);
+                    }
+                } catch (Exception e) {
+                    log.debug("Error while adding internal auth header to the request.", e);
+                }
                 return headers;
             }
         };

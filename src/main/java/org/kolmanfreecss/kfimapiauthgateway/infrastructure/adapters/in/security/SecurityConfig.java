@@ -14,7 +14,7 @@ public class SecurityConfig {
 
     final JwtAuthConverter authConverter;
     
-    final String[] allowedRoutes = new String[] {"/hello", "/api/v1/auth/**"};
+    final String[] allowedRoutes = new String[] {"/hello", "/api/v1/auth/**", "/incident/actuator/**"};
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
