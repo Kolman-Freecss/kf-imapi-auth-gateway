@@ -68,11 +68,11 @@ public class GatewayConfig {
 //                            f.filter(cachingGatewayFilter.cacheResponse());
                             f.stripPrefix(1);
                             f.filter(customGatewayFilter());
-                            f.circuitBreaker(c -> c.setName("incidentCircuitBreaker").setFallbackUri(FALLBACK_URI));
                             f.requestRateLimiter(config -> {
                                 config.setRateLimiter(redisRateLimiter);
                                 config.setKeyResolver(keyResolver);
                             });
+                            f.circuitBreaker(c -> c.setName("incidentCircuitBreaker").setFallbackUri(FALLBACK_URI));
                             return f;
                         })
                         .uri("lb://KF-IMAPI-INCIDENT-SERVICE"))
@@ -91,11 +91,11 @@ public class GatewayConfig {
 //                            f.filter(cachingGatewayFilter.cacheResponse());
                             f.stripPrefix(3);
                             f.filter(customGatewayFilter());
-                            f.circuitBreaker(c -> c.setName("authCircuitBreaker").setFallbackUri(FALLBACK_URI));
                             f.requestRateLimiter(config -> {
                                 config.setRateLimiter(redisRateLimiter);
                                 config.setKeyResolver(keyResolver);
                             });
+                            f.circuitBreaker(c -> c.setName("authCircuitBreaker").setFallbackUri(FALLBACK_URI));
                             return f;
                         })
                         .uri("http://localhost:9091"))
@@ -128,12 +128,13 @@ public class GatewayConfig {
 
                     // Continue the filter chain with the decorated request
                     return chain.filter(exchange.mutate().request(decoratedRequest).build());
-                }).circuitBreaker(c -> c.setName(serviceName + "CircuitBreaker")
-                        .setFallbackUri(FALLBACK_URI))
+                })
                 .requestRateLimiter(config -> {
                     config.setRateLimiter(redisRateLimiter);
                     config.setKeyResolver(keyResolver);
-                });
+                })
+                .circuitBreaker(c -> c.setName(serviceName + "CircuitBreaker")
+                        .setFallbackUri(FALLBACK_URI));
     }
 
     private ServerHttpRequest getDecoratedRequest(final ServerHttpRequest request) {

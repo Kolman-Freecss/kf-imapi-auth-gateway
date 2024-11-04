@@ -15,8 +15,8 @@ import java.util.Objects;
 /**
  * Redis configuration class for Cache implementation and Rate limiting.
  *
- * @version 1.0
  * @author Kolman-Freecss
+ * @version 1.0
  */
 @Configuration
 public class RedisConfig {
@@ -29,27 +29,32 @@ public class RedisConfig {
 //                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
 //                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 //    }
-    
+
     /**
      * Rate limiting Config -> Key resolver
-     * 
+     *
      * @return KeyResolver
      */
     @Bean
     public KeyResolver ipKeyResolver() {
-        return exchange -> Mono.just(Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress());
+        return exchange -> {
+            // JMeter performance testing
+            final String userId = exchange.getRequest().getHeaders().getFirst("X-User-ID");
+            // Get the IP address of the client
+            return Mono.just(userId != null ? userId : Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getHostString());
+        };
     }
-    
+
     /**
      * Rate limiting Config -> RedisRateLimiter
      * 10 requests per second with a burst capacity of 20
-     * 
+     *
      * @return RedisRateLimiter
      */
     @Bean
     public RedisRateLimiter redisRateLimiter() {
-        return new RedisRateLimiter(10, 20);
+        return new RedisRateLimiter(3, 5);
     }
-    
+
 
 }
