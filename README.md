@@ -16,14 +16,16 @@
 ## Brief Description
 
 Features: 
-- Implementation of security using Spring Boot 3.0 and Keycloak with JSON Web Tokens (JWT).
+- Implementation of security using Spring Boot 3.3 and Keycloak with JSON Web Tokens (JWT).
 - API Gateway for routing requests to the appropriate service.
   - Circuit Breaker using Resilience4j.
   - Also we hide the internal services from the outside world and KEYCLOAK (everything is behind the gateway).
 - SSO (Single Sign-On) using Keycloak.
+  - Each token is signed by Keycloak and validated by the API Gateway to access to all the services.
 - OAuth2 Protocol.
 - Internal JWT signing to validate the token in every microservice verifying the authenticity of the API Gateway token. (X-Internal-Auth)
   - (Another robust option is to sign every token through TLS, but it is not implemented in this project).
+- Redis for caching. As request limiters.
 
 ## Getting Started
 
@@ -53,12 +55,16 @@ Features:
 - Observability - Micrometer Tracing and Zipkin (Distributed Tracing) (Sleuth is deprecated)
   - We use AOP support to decorate the methods with tracing annotations.
 - Prometheus and Grafana (Monitoring)
+- Redis (Caching rate limiter)
+  - We can use Redis Insights (Client) to check the cache.
 
 ## TroubleShooting
 
 - To wire all services through gateway ensure you add correctly the names and no duplicate services are up in same time.
 - We need to use a specific filters to modify the immutable request headers because not in every phase of the request lifecycle we can modify the headers.
   - Also we need 2 filter, because not all traffic is going through the same spring path
+- Implementing the Cache with Redis at the Gateway level to limit the requests to the services.
+  - For some reason the cache with responses commited and stuff like that is not working properly.
 
 
 ---

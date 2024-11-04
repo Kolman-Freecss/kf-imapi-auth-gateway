@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * WebClientConfig
  *
  * @version 1.0
- * @uthor Kolman-Freecss
+ * @author Kolman-Freecss
  */
 @Configuration
 public class WebClientConfig {

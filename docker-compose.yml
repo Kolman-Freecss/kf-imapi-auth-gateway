@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:8.0-M02-alpine
+    container_name: redis-server
+    ports:
+      - "6379:6379" # Exposing Redis port
+    environment:
+      - REDIS_PASSWORD=1234
+    volumes:
+      - redis_data:/data # Volume to persist data
+    command: [ "redis-server", "--appendonly", "yes" ] # Configuring Redis to persist data using AOF (Append Only File)
+
+volumes:
+  redis_data:
+    driver: local

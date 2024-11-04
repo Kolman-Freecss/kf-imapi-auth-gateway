@@ -16,7 +16,18 @@ spring:
           keycloak:
             client-id: demo
             scope: openid
-  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 1234
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8 # Maximum number of connections that can be allocated by the pool at a given time
+          max-idle: 8
+          min-idle: 4
+
 server:
   port: 8084
   

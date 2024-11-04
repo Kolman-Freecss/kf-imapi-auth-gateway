@@ -3,8 +3,11 @@ package org.kolmanfreecss.kfimapiauthgateway.infrastructure.adapters.in.gateway;
 import org.kolmanfreecss.kfimapiauthgateway.infrastructure.rest.FallbackController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
+import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.GatewayFilterSpec;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -35,6 +38,19 @@ public class GatewayConfig {
     @Value("${gateway.internal-auth-secret}")
     private String internalAuthSecret;
 
+    @Qualifier("ipKeyResolver")
+    private final KeyResolver keyResolver;
+
+    private final RedisRateLimiter redisRateLimiter;
+    
+//    private final CachingGatewayFilter cachingGatewayFilter;
+    
+    public GatewayConfig(@Qualifier("ipKeyResolver") final KeyResolver keyResolver,
+                         final RedisRateLimiter redisRateLimiter) {
+        this.keyResolver = keyResolver;
+        this.redisRateLimiter = redisRateLimiter;
+    }
+
     @Bean
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -45,17 +61,18 @@ public class GatewayConfig {
                         .uri("lb://KF-IMAPI-RESPONSES-SERVICE")) // Using Eureka service name
 
                 // Service route for "incident"
-//                .route("incident_service", route -> route
-//                        .path("/api/v1/incident/**")
-//                        .filters(customFilters("incident"))
-//                        .uri("lb://KF-IMAPI-INCIDENT-SERVICE"))
-
                 .route("incident_service", route -> route
                         .path("/incident/**")
                         .filters(f -> {
+////                             Take care to put it after stripPrefix
+//                            f.filter(cachingGatewayFilter.cacheResponse());
                             f.stripPrefix(1);
                             f.filter(customGatewayFilter());
                             f.circuitBreaker(c -> c.setName("incidentCircuitBreaker").setFallbackUri(FALLBACK_URI));
+                            f.requestRateLimiter(config -> {
+                                config.setRateLimiter(redisRateLimiter);
+                                config.setKeyResolver(keyResolver);
+                            });
                             return f;
                         })
                         .uri("lb://KF-IMAPI-INCIDENT-SERVICE"))
@@ -70,9 +87,15 @@ public class GatewayConfig {
                 .route("auth_service", route -> route
                         .path("/api/v1/auth/**")
                         .filters(f -> {
+////                             Take care to put it after stripPrefix
+//                            f.filter(cachingGatewayFilter.cacheResponse());
                             f.stripPrefix(3);
                             f.filter(customGatewayFilter());
                             f.circuitBreaker(c -> c.setName("authCircuitBreaker").setFallbackUri(FALLBACK_URI));
+                            f.requestRateLimiter(config -> {
+                                config.setRateLimiter(redisRateLimiter);
+                                config.setKeyResolver(keyResolver);
+                            });
                             return f;
                         })
                         .uri("http://localhost:9091"))
@@ -100,13 +123,17 @@ public class GatewayConfig {
      */
     private Function<GatewayFilterSpec, UriSpec> customFilters(final String serviceName) {
         return f -> f.filter((exchange, chain) -> {
-            // We need to override the headers to add the internal auth secret because they are immutable by default 
-            final ServerHttpRequest decoratedRequest = getDecoratedRequest(exchange.getRequest());
+                    // We need to override the headers to add the internal auth secret because they are immutable by default 
+                    final ServerHttpRequest decoratedRequest = getDecoratedRequest(exchange.getRequest());
 
-            // Continue the filter chain with the decorated request
-            return chain.filter(exchange.mutate().request(decoratedRequest).build());
-        }).circuitBreaker(c -> c.setName(serviceName + "CircuitBreaker")
-                .setFallbackUri(FALLBACK_URI));
+                    // Continue the filter chain with the decorated request
+                    return chain.filter(exchange.mutate().request(decoratedRequest).build());
+                }).circuitBreaker(c -> c.setName(serviceName + "CircuitBreaker")
+                        .setFallbackUri(FALLBACK_URI))
+                .requestRateLimiter(config -> {
+                    config.setRateLimiter(redisRateLimiter);
+                    config.setKeyResolver(keyResolver);
+                });
     }
 
     private ServerHttpRequest getDecoratedRequest(final ServerHttpRequest request) {

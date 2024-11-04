@@ -1,0 +1,16 @@
+## TODO
+- [ ] SonarQube
+  - [ ] JaCoCo for code coverage
+- [ ] Tests (unit, integration, e2e)
+  - [ ] JMeter to test performance
+  - [ ] Selenium to test UI
+- [ ] CI/CD (GitHub Actions)
+- [x] Rate limiting
+- [ ] Caching (TODO: Caching in gateway layer doesn't work because of response commited)
+  - [ ] Redis 
+- [ ] Perform logging
+- [ ] Integrate Loki instead ELK
+- [ ] AWS (Elastic Beanstalk, RDS, S3...)
+- [ ] Optimize DDBB access (Connection Pooling, JDBC, JPA, Hibernate)
+- [ ] Criteria (Pagination, Sorting, Filtering)
+
