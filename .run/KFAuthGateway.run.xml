@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="KFAuthGateway" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="kf-imapi-auth-gateway" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.kolmanfreecss.kfimapiauthgateway.KFAuthGateway" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.kolmanfreecss.kfimapiauthgateway.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

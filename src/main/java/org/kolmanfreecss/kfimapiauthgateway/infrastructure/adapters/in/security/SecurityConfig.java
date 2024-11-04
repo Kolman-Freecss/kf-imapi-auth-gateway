@@ -1,6 +1,7 @@
 package org.kolmanfreecss.kfimapiauthgateway.infrastructure.adapters.in.security;
 
 import lombok.RequiredArgsConstructor;
+import org.kolmanfreecss.kfimapiauthgateway.infrastructure.exceptions.KfAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -14,10 +15,10 @@ public class SecurityConfig {
 
     final JwtAuthConverter authConverter;
     
-    final String[] allowedRoutes = new String[] {"/hello", "/api/v1/auth/**", "/incident/actuator/**"};
+    final String[] allowedRoutes = new String[] {"/hello", "/dummyException", "/api/v1/auth/**", "/incident/actuator/**"};
 
     @Bean
-    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
+    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable) // Disable CSRF if we are using JWT
                 .authorizeExchange(authorize -> authorize
@@ -28,6 +29,9 @@ public class SecurityConfig {
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(authConverter))
+                )
+                .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec
+                        .authenticationEntryPoint(new KfAuthenticationEntryPoint())
                 );
 
         return http.build();

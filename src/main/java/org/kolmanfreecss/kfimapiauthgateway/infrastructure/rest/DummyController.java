@@ -27,4 +27,9 @@ public class DummyController {
         return "Goodbye Admin!";
     }
     
+    @GetMapping("/dummyException")
+    public String dummyException() {
+        throw new RuntimeException("Dummy exception");
+    }
+    
 }
