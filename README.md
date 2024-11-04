@@ -26,6 +26,7 @@ Features:
 - Internal JWT signing to validate the token in every microservice verifying the authenticity of the API Gateway token. (X-Internal-Auth)
   - (Another robust option is to sign every token through TLS, but it is not implemented in this project).
 - Redis for caching. As request limiters.
+- Load Balancer using Eureka.
 
 ## Getting Started
 

@@ -6,6 +6,8 @@
   - [ ] Selenium to test UI
 - [ ] CI/CD (GitHub Actions)
 - [x] Rate limiting
+  - [ ] Test rate limiting with integration tests
+    - [ ] Integration tests with 20 requests per second not working 
 - [ ] Caching (TODO: Caching in gateway layer doesn't work because of response commited)
   - [ ] Redis 
 - [ ] Perform logging
@@ -13,4 +15,4 @@
 - [ ] AWS (Elastic Beanstalk, RDS, S3...)
 - [ ] Optimize DDBB access (Connection Pooling, JDBC, JPA, Hibernate)
 - [ ] Criteria (Pagination, Sorting, Filtering)
-
+- [ ] OpenAPI (Swagger) Not working

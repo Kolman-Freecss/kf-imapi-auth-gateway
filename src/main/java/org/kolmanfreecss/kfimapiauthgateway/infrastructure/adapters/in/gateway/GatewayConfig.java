@@ -54,6 +54,22 @@ public class GatewayConfig {
     @Bean
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
+                
+                // DUMMY route for testing
+                .route("dummy_tests", route -> route
+                        .path("/dummy/**")
+                        .filters(f -> {
+                            f.stripPrefix(1);
+                            f.filter(customGatewayFilter());
+                            f.requestRateLimiter(config -> {
+                                config.setRateLimiter(redisRateLimiter);
+                                config.setKeyResolver(keyResolver);
+                            });
+                            f.circuitBreaker(c -> c.setName("dummyCircuitBreaker").setFallbackUri(FALLBACK_URI));
+                            return f;
+                        })
+                        .uri("http://localhost:8084"))
+                
                 // Service route for "responses"
                 .route("users_service", route -> route
                         .path("/api/v1/responses/**")
