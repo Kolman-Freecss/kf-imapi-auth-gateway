@@ -6,8 +6,7 @@
   - [ ] Selenium to test UI
 - [ ] CI/CD (GitHub Actions)
 - [x] Rate limiting
-  - [ ] Test rate limiting with integration tests
-    - [ ] Integration tests with 20 requests per second not working 
+  - [X] Test rate limiting with integration tests
 - [ ] Caching (TODO: Caching in gateway layer doesn't work because of response commited)
   - [ ] Redis 
 - [ ] Perform logging
@@ -16,3 +15,4 @@
 - [ ] Optimize DDBB access (Connection Pooling, JDBC, JPA, Hibernate)
 - [ ] Criteria (Pagination, Sorting, Filtering)
 - [ ] OpenAPI (Swagger) Not working
+- [ ] Enable Caffeine cache for LoadBalancer

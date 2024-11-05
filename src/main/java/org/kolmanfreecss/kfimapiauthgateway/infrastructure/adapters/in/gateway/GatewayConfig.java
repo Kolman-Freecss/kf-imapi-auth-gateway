@@ -1,8 +1,7 @@
 package org.kolmanfreecss.kfimapiauthgateway.infrastructure.adapters.in.gateway;
 
+import lombok.extern.slf4j.Slf4j;
 import org.kolmanfreecss.kfimapiauthgateway.infrastructure.rest.FallbackController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -15,6 +14,7 @@ import org.springframework.cloud.gateway.route.builder.UriSpec;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 
@@ -27,14 +27,14 @@ import java.util.function.Function;
  * @author Kolman-Freecss
  * @version 1.0
  */
+@Slf4j
 @Configuration
 public class GatewayConfig {
 
     public static final String INTERNAL_AUTH_HEADER = "X-Internal-Auth";
 
     private static final String FALLBACK_URI = "forward:/fallback";
-    private static final Logger log = LoggerFactory.getLogger(GatewayConfig.class);
-
+    
     @Value("${gateway.internal-auth-secret}")
     private String internalAuthSecret;
 
@@ -64,7 +64,9 @@ public class GatewayConfig {
                             f.requestRateLimiter(config -> {
                                 config.setRateLimiter(redisRateLimiter);
                                 config.setKeyResolver(keyResolver);
+                                config.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
                             });
+//                            f.setResponseHeader("X-RateLimit-Remaining", "0");
                             f.circuitBreaker(c -> c.setName("dummyCircuitBreaker").setFallbackUri(FALLBACK_URI));
                             return f;
                         })
@@ -127,6 +129,7 @@ public class GatewayConfig {
     private GatewayFilter customGatewayFilter() {
         return (exchange, chain) -> {
             final ServerHttpRequest decoratedRequest = getDecoratedRequest(exchange.getRequest());
+//            log.info("Custom gateway filter + " + decoratedRequest.getPath() + " + " + decoratedRequest.getHeaders());
             return chain.filter(exchange.mutate().request(decoratedRequest).build());
         };
     }

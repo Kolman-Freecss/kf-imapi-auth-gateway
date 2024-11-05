@@ -27,6 +27,10 @@ Features:
   - (Another robust option is to sign every token through TLS, but it is not implemented in this project).
 - Redis for caching. As request limiters.
 - Load Balancer using Eureka.
+- Testing
+  - Integration tests with Groovy and Spock. 
+  - Performance tests with JMeter.
+  - Concurrent tests with Virtual Threads (JDK 19).
 
 ## Getting Started
 

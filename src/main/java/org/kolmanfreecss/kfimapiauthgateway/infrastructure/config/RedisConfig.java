@@ -4,10 +4,6 @@ import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -20,6 +16,11 @@ import java.util.Objects;
  */
 @Configuration
 public class RedisConfig {
+    
+    public static final String INTERNAL_X_USER_ID = "X-User-ID";
+    
+    private static final Integer REPLENISH_RATE = 10;
+    private static final Integer BURST_CAPACITY = 20;
 
 //    @Bean
 //    public RedisCacheConfiguration cacheConfiguration() {
@@ -39,7 +40,7 @@ public class RedisConfig {
     public KeyResolver ipKeyResolver() {
         return exchange -> {
             // JMeter performance testing
-            final String userId = exchange.getRequest().getHeaders().getFirst("X-User-ID");
+            final String userId = exchange.getRequest().getHeaders().getFirst(INTERNAL_X_USER_ID);
             // Get the IP address of the client
             return Mono.just(userId != null ? userId : Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getHostString());
         };
@@ -53,7 +54,7 @@ public class RedisConfig {
      */
     @Bean
     public RedisRateLimiter redisRateLimiter() {
-        return new RedisRateLimiter(3, 5);
+        return new RedisRateLimiter(REPLENISH_RATE, BURST_CAPACITY);
     }
 
 
